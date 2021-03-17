@@ -205,4 +205,6 @@ RewriteRule . /index.php [L]
 <li><a href="https://www.digitalocean.com/community/tutorials/automating-the-deployment-of-a-scalable-wordpress-site">Automating the deployment of a scalable WordPress site</a></li>
 <li><a href="https://www.digitalocean.com/community/tutorials/how-to-create-a-redundant-storage-pool-using-glusterfs-on-ubuntu-20-04-es">Cómo crear un grupo de almacenamiento redundante con GlusterFS en Ubuntu 20.04</a>. Mark Drake.</li>
 <li><a href="resources/21_Tips_WP_Ebook_ES.pdf">Ebook: 21 Trucos para tener tu WordPress seguro</a>. SiteGround.</li>
+ <li><a href="  https://josejuansanchez.org/iaw/practica-08/index.html">Jose Juan Sanchez</a></li>
+
 </ul>
