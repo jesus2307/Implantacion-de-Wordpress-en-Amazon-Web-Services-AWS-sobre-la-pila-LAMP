@@ -1,117 +1,98 @@
 # iaw-practica-08
-# 1 Práctica 8: Implantación de Wordpress en Amazon Web Services (AWS) sobre la pila LAMP
-En esta práctica tendremos que realizar la instalación de un sitio WordPress haciendo uso de los servicios de Amazon Web Services (AWS)
 
-Despliega la última versión de Worpress utilizando la siguiente arquitectura propuesta:
-![](https://raw.githubusercontent.com/joseean29/Practica8/main/estructura.png)
-
-La arquitectura estará formada por:
-- Un balanceador de carga, implementado con un Apache HTTP Server configurado como proxy inverso.
-- Una capa de front-end, formada por dos servidores web con Apache HTTP Server.
-- Una capa de back-end, formada por un servidor MySQL.
-
-Necesitará crear las siguientes máquinas virtuales:
-- Balanceador.
-- Frontal Web 1.
-- Frontal Web 2.
-- Servidor de Base de Datos MySQL.
-
-## 1.1 Fases de la práctica
-Tendrá que resolver la práctica en diferentes fases, documentando en cada fase todos los pasos que ha ido realizando. El repositorio final tiene que contener un directorio para cada una de las fases donde se incluyan los scripts y archivos de configuración utilizados para su resolución.
-```
-práctica-wordpress-lamp
+<h1 id="práctica-8-implantación-de-wordpress-en-amazon-web-services-aws-sobre-la-pila-lamp"><span class="header-section-number">1</span> Práctica 8: Implantación de Wordpress en Amazon Web Services (AWS) sobre la pila LAMP</h1>
+<p>En esta práctica tendremos que realizar la instalación de un sitio <a href="https://josejuansanchez.org/iaw/practica-08/index.html">WordPress</a> haciendo uso de los servicios de <a href="https://aws.amazon.com/es/">Amazon Web Services (AWS)</a></p>
+<p>Despliega la última versión de <a href="https://wordpress.org">Worpress</a> utilizando la siguiente arquitectura propuesta:</p>
+<p><img src="data:image/png;base64,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" /></p>
+<p>La arquitectura estará formada por:</p>
+<ul>
+<li>Un balanceador de carga, implementado con un <a href="https://www.apache.org">Apache HTTP Server</a> configurado como <a href="https://httpd.apache.org/docs/trunk/es/howto/reverse_proxy.html">proxy inverso</a>.</li>
+<li>Una capa de <em>front-end</em>, formada por dos servidores web con <a href="https://www.apache.org">Apache HTTP Server</a>.</li>
+<li>Una capa de <em>back-end</em>, formada por un servidor <a href="https://www.mysql.com">MySQL</a>.</li>
+</ul>
+<p>Necesitará crear las siguientes máquinas virtuales:</p>
+<ul>
+<li>Balanceador.</li>
+<li>Frontal Web 1.</li>
+<li>Frontal Web 2.</li>
+<li>Servidor de Base de Datos MySQL.</li>
+</ul>
+<h2 id="fases-de-la-práctica"><span class="header-section-number">1.1</span> Fases de la práctica</h2>
+<p>Tendrá que resolver la práctica en diferentes fases, documentando en cada fase todos los pasos que ha ido realizando. El repositorio final tiene que contener un directorio para cada una de las fases donde se incluyan los scripts y archivos de configuración utilizados para su resolución.</p>
+<pre><code>práctica-wordpress-lamp
   .
   ├── fase00
   ├── fase01
-  └── fase02
-  ```
-  
-Las fases que tendrá que resolver son las siguientes:
-- Fase 0. Instalación de Wordpress en un nivel (Un único servidor con todo lo necesario).
-- Fase 1. Instalación de Wordpress en dos niveles (Servidor web, Servidor MySQL).
-- Fase 2. Instalación de Wordpress en tres niveles (Balanceador, 2 Servidores webs, Servidor MySQL).
-
-## 1.2 Tareas a realizar
-A continuación se describen muy brevemente algunas de las tareas que tendrá que realizar sobre cada una de las máquinas.
-
-### 1.2.1 Balanceador de carga
-- Instalar el software necesario.
-- Habilitar los módulos necesarios y configurar Apache HTTP Server como proxy inverso.
-
-### 1.2.2 Front-End
-- Instalar el software necesario.
-- Descargar la última versión de WordPress y descomprimir en el directorio apropiado.
-- Configurar WordPress para que pueda conectar con MySQL.
-- Sincronizar el contenido estático en la capa de Front-End.
-- Configurción de las Security Keys.
-
-### 1.2.3 Back-End
-- Instalar el software necesario.
-- Configurar MySQL para que acepte conexiones que no sean de localhost.
-- Crear una base de datos para WordPress.
-- Crear un usuario para la base de datos de WordPress y asignarle los permisos apropiados.
-
-## 1.3 Sincronización del contenido estático en la capa de Front-End
-Al tener varias máquinas en la capa de Front-End tenemos que tener en cuenta que podemos tener algunos problemas a la hora de guardar contenido estático en el directorio uploads, instalar nuevos themes o instalar nuevos plugins, ya que estos contenidos se guardarán sobre el sistema de ficheros del frontal web que esté atendiendo nuestra petición. El contenido estático se almacena en el directorio wp-content.
-
-Por ejemplo, puede ocurrir que hayamos instalado un nuevo plugin en uno de los frontales web y que el resto de frontales no tengan constancia de que este nuevo plugin ha sido instalado. También puede ocurrir que cuando uno de los frontales web esté fuera de servicio todo el contenido del directorio uploads estará inaccesible.
-
-Para resolver este problema tenemos varias opciones, en nuestro caso vamos a estudiar las siguientes:
-1. Utilizar almacenamiento compartido por NFS del directorio /var/www/html/wp-content entre todos los servidores de la capa de front-end.
-2. Sincronización con rsync de los archivos del directorio /var/www/html/wp-content entre todos los servidores de la capa de front-end.
-3. Utilizar un sistema de almacenamiento distribuido seguro con GlusterFS.
-
-### 1.3.1 NFS
-Podemos utilizar NFS para que los servidores de la capa de front-end compartan el directorio /var/www/html/wp-content. En nuestro caso un frontal hará de servidor NFS y el otro de cliente NFS. El servidor NFS compartirá el directorio /var/www/html/wp-content y el cliente podrá montar este directorio en su sistema de ficheros.
-
-Por ejemplo, en mi caso las máquinas tendrán las siguientes IPs:
-```
-- Servidor NFS: 192.168.33.11
-- Cliente NFS: 192.168.33.12
-```
-
-#### Paso 1: Instalación de paquetes
-Instalación de paquetes necesarios en el servidor NFS:
-```
-sudo apt-get update
-sudo apt-get install nfs-kernel-server
-```
-Instalación de paquetes necesarios en el cliente NFS:
-```
-sudo apt-get update
-sudo apt-get install nfs-common
-```
-
-#### Paso 2: Exportamos el directorio en el servidor NFS
-Cambiamos los permisos al directorio que vamos a compartir:
-```
-sudo chown nobody:nogroup /var/www/html/wp-content
-```
-Editamos el archivo /etc/exports:
-```
-sudo nano /etc/exports
-```
-Añadimos la siguiente línea:
-```
-/var/www/html/wp-content      192.168.33.12(rw,sync,no_root_squash,no_subtree_check)
-```
-Donde 192.168.33.12 es la IP del cliente NFS con el que queremos compartir el directorio.
-
-#### Paso 3: Reiniciamos el servicio NFS
-```
-sudo /etc/init.d/nfs-kernel-server restart
-```
-**NOTA: Tenga en cuenta que para que el servicio de NFS pueda funcionar tendrá que abrir el puerto 2049 para poder aceptar conexiones TCP y UDP.**
-
-#### 1.3.1.4 Paso 4: Creamos el punto de montaje en el cliente NFS
-```
-sudo mount 192.168.33.11:/var/www/html/wp-content /var/www/html/wp-content
-```
-Donde 192.168.33.11 es la IP del servidor NFS que está compartiendo el directorio.
-
-Una vez hecho esto comprobamos con df -h que le punto de montaje aparece en el listado.
-```
-$ df -h
+  └── fase02</code></pre>
+<p>Las fases que tendrá que resolver son las siguientes:</p>
+<ul>
+<li>Fase 0. Instalación de Wordpress en un nivel (Un único servidor con todo lo necesario).</li>
+<li>Fase 1. Instalación de Wordpress en dos niveles (Servidor web, Servidor MySQL).</li>
+<li>Fase 2. Instalación de Wordpress en tres niveles (Balanceador, 2 Servidores webs, Servidor MySQL).</li>
+</ul>
+<h2 id="tareas-a-realizar"><span class="header-section-number">1.2</span> Tareas a realizar</h2>
+<p>A continuación se describen <strong>muy brevemente</strong> algunas de las tareas que tendrá que realizar sobre cada una de las máquinas.</p>
+<h3 id="balanceador-de-carga"><span class="header-section-number">1.2.1</span> Balanceador de carga</h3>
+<ul>
+<li>Instalar el software necesario.</li>
+<li>Habilitar los módulos necesarios y configurar <a href="https://www.apache.org">Apache HTTP Server</a> como <a href="https://httpd.apache.org/docs/trunk/es/howto/reverse_proxy.html">proxy inverso</a>.</li>
+</ul>
+<h3 id="front-end"><span class="header-section-number">1.2.2</span> <em>Front-End</em></h3>
+<ul>
+<li>Instalar el software necesario.</li>
+<li>Descargar la última versión de <a href="https://wordpress.org">WordPress</a> y descomprimir en el directorio apropiado.</li>
+<li><a href="https://codex.wordpress.org/Editing_wp-config.php#Configure_Database_Settings">Configurar WordPress para que pueda conectar con MySQL</a>.</li>
+<li>Sincronizar el contenido estático en la capa de <em>Front-End</em>.</li>
+<li>Configurción de las <em>Security Keys</em>.</li>
+</ul>
+<h3 id="back-end"><span class="header-section-number">1.2.3</span> <em>Back-End</em></h3>
+<ul>
+<li>Instalar el software necesario.</li>
+<li>Configurar <a href="https://www.mysql.com">MySQL</a> para que acepte conexiones que no sean de <em>localhost</em>.</li>
+<li>Crear una base de datos para <a href="https://wordpress.org">WordPress</a>.</li>
+<li>Crear un usuario para la base de datos de <a href="https://wordpress.org">WordPress</a> y asignarle los permisos apropiados.</li>
+</ul>
+<h2 id="sincronización-del-contenido-estático-en-la-capa-de-front-end"><span class="header-section-number">1.3</span> Sincronización del contenido estático en la capa de <em>Front-End</em></h2>
+<p>Al tener varias máquinas en la capa de <em>Front-End</em> tenemos que tener en cuenta que podemos tener algunos problemas a la hora de guardar contenido estático en el directorio <strong><em>uploads</em></strong>, instalar nuevos <strong><em>themes</em></strong> o instalar nuevos <strong><em>plugins</em></strong>, ya que estos contenidos se guardarán sobre el sistema de ficheros del frontal web que esté atendiendo nuestra petición. El contenido estático se almacena en el directorio <strong><em>wp-content</em></strong>.</p>
+<p>Por ejemplo, puede ocurrir que hayamos instalado un nuevo <strong><em>plugin</em></strong> en uno de los frontales web y que el resto de frontales no tengan constancia de que este nuevo <strong><em>plugin</em></strong> ha sido instalado. También puede ocurrir que cuando uno de los frontales web esté fuera de servicio todo el contenido del directorio <strong><em>uploads</em></strong> estará inaccesible.</p>
+<p>Para resolver este problema tenemos varias opciones, en nuestro caso vamos a estudiar las siguientes:</p>
+<ol type="1">
+<li>Utilizar almacenamiento compartido por <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a> del directorio <code>/var/www/html/wp-content</code> entre todos los servidores de la capa de <em>front-end</em>.</li>
+<li>Sincronización con <a href="https://es.wikipedia.org/wiki/Rsync">rsync</a> de los archivos del directorio <code>/var/www/html/wp-content</code> entre todos los servidores de la capa de <em>front-end</em>.</li>
+<li>Utilizar un sistema de almacenamiento distribuido seguro con <a href="https://www.gluster.org">GlusterFS</a>.</li>
+</ol>
+<h3 id="opción-1-nfs"><span class="header-section-number">1.3.1</span> Opción 1: NFS</h3>
+<p><strong>Inconveniente</strong>: La máquina que actúa como servidor NFS es un <a href="https://es.wikipedia.org/wiki/Single_point_of_failure">SPOF (Single Point of Failure)</a>.</p>
+<p>Podemos utilizar <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a> para que los servidores de la capa de <em>front-end</em> compartan el directorio <code>/var/www/html/wp-content</code>. En nuestro caso un frontal hará de servidor <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a> y el otro de cliente <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a>. El servidor <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a> compartirá el directorio <code>/var/www/html/wp-content</code> y el cliente podrá montar este directorio en su sistema de ficheros.</p>
+<p>Por ejemplo, en mi caso las máquinas tendrán las siguientes IPs:</p>
+<ul>
+<li><strong>Servidor NFS:</strong> 192.168.33.11</li>
+<li><strong>Cliente NFS:</strong> 192.168.33.12</li>
+</ul>
+<h4 id="paso-1-instalación-de-paquetes"><span class="header-section-number">1.3.1.1</span> Paso 1: Instalación de paquetes</h4>
+<p>Instalación de paquetes necesarios en el <strong>servidor NFS</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" title="1"><span class="fu">sudo</span> apt-get update</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="fu">sudo</span> apt-get install nfs-kernel-server</a></code></pre></div>
+<p>Instalación de paquetes necesarios en el <strong>cliente NFS</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" title="1"><span class="fu">sudo</span> apt-get update</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="fu">sudo</span> apt-get install nfs-common</a></code></pre></div>
+<h4 id="paso-2-exportamos-el-directorio-en-el-servidor-nfs"><span class="header-section-number">1.3.1.2</span> Paso 2: Exportamos el directorio en el servidor NFS</h4>
+<p>Cambiamos los permisos al directorio que vamos a compartir:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" title="1"><span class="fu">sudo</span> chown nobody:nogroup /var/www/html/wp-content</a></code></pre></div>
+<p>Editamos el archivo <code>/etc/exports</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" title="1"><span class="fu">sudo</span> nano /etc/exports</a></code></pre></div>
+<p>Añadimos la siguiente línea:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" title="1"><span class="ex">/var/www/html/wp-content</span>      192.168.33.12(rw,sync,no_root_squash,no_subtree_check)</a></code></pre></div>
+<p>Donde <strong>192.168.33.12</strong> es la IP del cliente NFS con el que queremos compartir el directorio.</p>
+<p>En la <a href="http://manpages.ubuntu.com/manpages/xenial/en/man5/exports.5.html">documentación oficial</a> podemos consultar una descripción detallada de cada uno de los parámetros utilizados en el archivo <code>/etc/exports</code>.</p>
+<h4 id="paso-3-reiniciamos-el-servicio-nfs"><span class="header-section-number">1.3.1.3</span> Paso 3: Reiniciamos el servicio NFS</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" title="1"><span class="fu">sudo</span> /etc/init.d/nfs-kernel-server restart</a></code></pre></div>
+<p><mark><strong>NOTA:</strong> Tenga en cuenta que para que el servicio de NFS pueda funcionar tendrá que abrir el puerto 2049 para poder aceptar conexiones TCP y UDP.</mark></p>
+<h4 id="paso-4-creamos-el-punto-de-montaje-en-el-cliente-nfs"><span class="header-section-number">1.3.1.4</span> Paso 4: Creamos el punto de montaje en el cliente NFS</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" title="1"><span class="fu">sudo</span> mount 192.168.33.11:/var/www/html/wp-content /var/www/html/wp-content</a></code></pre></div>
+<p>Donde <strong>192.168.33.11</strong> es la IP del servidor NFS que está compartiendo el directorio.</p>
+<p>Una vez hecho esto comprobamos con <code>df -h</code> que le punto de montaje aparece en el listado.</p>
+<pre><code>$ df -h
 
 udev                                    490M     0  490M   0% /dev
 tmpfs                                   100M  3.1M   97M   4% /run
@@ -120,71 +101,108 @@ tmpfs                                   497M     0  497M   0% /dev/shm
 tmpfs                                   5.0M     0  5.0M   0% /run/lock
 tmpfs                                   497M     0  497M   0% /sys/fs/cgroup
 192.168.33.11:/var/www/html/wp-content  9.7G  1.1G  8.6G  12% /var/www/html/wp-content
-tmpfs                                   100M     0  100M   0% /run/user/1000
-```
-
-#### 1.3.1.5 Paso 5: Editamos el archivo /etc/fstab en el cliente NFS
-Editamos el archivo /etc/fstab para que al iniciar la máquina se monte automáticamente el directorio compartido por NFS.
-```
-sudo nano /etc/fstab
-```
-Añadimos la siguiente línea:
-```
-192.168.33.11:/var/www/html/wp-content /var/www/html/wp-content  nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0
-```
-Donde 192.168.33.11 es la IP del servidor NFS que está compartiendo el directorio.
-
-## 1.4 Notas sobre la configuración de Wordpress
-### 1.4.1 Instalación sobre un directorio que no es el raíz
-Si hemos realizado la instalación de WordPress sobre un directorio que no es el raíz tendremos que realizar dos pasos adicionales.
-
-Por ejemplo, si tenemos los archivos de WordPress en el directorio `/var/www/html/wordpress` en lugar de tenerlos en el directorio `/var/www/html` tendremos que configurar la dirección de WordPress (`WP_SITEURL`) y la dirección del sitio (`WP_HOME`).
-
-#### 1.4.1.1 Dirección de WordPress y Dirección del sitio
-Una vez instalado WordPress accederemos al **panel de administración** y buscaremos la sección de **Ajustes -> Generales**. Allí configuraremos los valores de **Dirección de WordPress (`WP_SITEURL`)** y **Dirección del sitio (`WP_HOME`)** con los siguientes valores:
-
-- **Dirección de WordPress (`WP_SITEURL`)**: http://IP_BALANCEADOR/wordpress
-- **Dirección del sitio (`WP_HOME`)**: http://IP_BALANCEADOR
-
-Ejemplo:
-- **Dirección de WordPress (`WP_SITEURL`)**: http://192.168.33.10/wordpress
-- **Dirección del sitio (`WP_HOME`)**: http://192.168.33.10
-
-Nota:
-- **Dirección de WordPress (`WP_SITEURL`)**: Es la URL que incluye el directorio donde está instalado WordPress.
-- **Dirección del sitio (`WP_HOME`)**: Es la URL que queremos que usen los usuarios para acceder a WordPress.
-
-### 1.4.2 Configuración de WordPress en un directorio que no es el raíz
-Realiza las siguientes acciones en cada uno de los frontales web:
-- Copia el archivo `/var/www/html/wordpress/index.php` a `/var/www/html/index.php`.
-- Edita el archivo `/var/www/html/index.php` y modifica la siguiente línea de código:
-```
-/** Loads the WordPress Environment and Template */
-require( dirname( __FILE__ ) . '/wp-blog-header.php' );
-```
-
-Por esta línea de código:
-```
-/** Loads the WordPress Environment and Template */
-require( dirname( __FILE__ ) . '/wordpress/wp-blog-header.php' );
-```
-
-Donde **`wordpress`** es el directorio donde se encuentra el código fuente de WordPress que hemos descomprimido en pasos anteriores.
-```
-# BEGIN WordPress
-<IfModule mod_rewrite.c>
+tmpfs                                   100M     0  100M   0% /run/user/1000</code></pre>
+<h4 id="paso-5-editamos-el-archivo-etcfstab-en-el-cliente-nfs"><span class="header-section-number">1.3.1.5</span> Paso 5: Editamos el archivo <code>/etc/fstab</code> en el cliente NFS</h4>
+<p>Editamos el archivo <code>/etc/fstab</code> para que al iniciar la máquina se monte automáticamente el directorio compartido por <a href="https://es.wikipedia.org/wiki/Network_File_System">NFS</a>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" title="1"><span class="fu">sudo</span> nano /etc/fstab</a></code></pre></div>
+<p>Añadimos la siguiente línea:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" title="1"><span class="ex">192.168.33.11</span>:/var/www/html/wp-content /var/www/html/wp-content  nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0</a></code></pre></div>
+<p>Donde <strong>192.168.33.11</strong> es la IP del servidor NFS que está compartiendo el directorio.</p>
+<p>En la <a href="http://manpages.ubuntu.com/manpages/xenial/en/man5/fstab.5.html">documentación oficial</a> podemos consultar una descripción detallada de cada uno de los parámetros utilizados en el archivo <code>/etc/fstabs</code>.</p>
+<h3 id="opción-2-rsync"><span class="header-section-number">1.3.2</span> Opción 2: <code>rsync</code></h3>
+<p><strong>Inconveniente</strong>: En esta opción tiene que existir una máquina donde se redirijan todas las peticiones que se hacen a <code>wp-admin</code> y todo el contenido que se almacene en el directorio <code>uploads</code>, <code>themes</code>, <code>plugin</code>, etc. será el contenido que se sincronice con el resto de máquinas de la capa de <em>front-end</em>. El problema es que la máquina que gestiona las peticiones que se hacen a <code>wp-admin</code> es un <a href="https://es.wikipedia.org/wiki/Single_point_of_failure">SPOF (Single Point of Failure)</a>.</p>
+<h3 id="opción-3-glusterfs"><span class="header-section-number">1.3.3</span> Opción 3: GlusterFS</h3>
+<p>Otra opción es hacer uso de <a href="https://www.gluster.org">GlusterFS</a>, que es un sistema de archivos multiescalable para <a href="https://es.wikipedia.org/wiki/Almacenamiento_conectado_en_red">NAS</a>.</p>
+<p><img src="data:image/png;base64,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" /></p>
+<p>Puede encontrar más información sobre cómo crear un grupo de almacenamiento redundante con GlusterFS en <a href="https://www.gluster.org">la guía de Mark Drake publicada en DigitalOcean</a>.</p>
+<h2 id="notas-sobre-la-configuración-de-wordpress"><span class="header-section-number">1.4</span> Notas sobre la configuración de WordPress</h2>
+<h3 id="instalación-sobre-un-directorio-que-no-es-el-raíz"><span class="header-section-number">1.4.1</span> Instalación sobre un directorio que no es el raíz</h3>
+<p>Si hemos realizado la instalación de <a href="https://wordpress.org">WordPress</a> sobre un directorio que no es el raíz tendremos que realizar dos pasos adicionales.</p>
+<p>Por ejemplo, si tenemos los archivos de <a href="https://wordpress.org">WordPress</a> en el directorio <code>/var/www/html/wordpress</code> en lugar de tenerlos en el directorio <code>/var/www/html</code> tendremos que configurar la dirección de WordPress (<code>WP_SITEURL</code>) y la dirección del sitio (<code>WP_HOME</code>).</p>
+<h4 id="dirección-de-wordpress-y-dirección-del-sitio"><span class="header-section-number">1.4.1.1</span> Dirección de WordPress y Dirección del sitio</h4>
+<p>Una vez instalado <a href="https://wordpress.org">WordPress</a> accederemos al <strong>panel de administración</strong> y buscaremos la sección de <strong>Ajustes -&gt; Generales</strong>. Allí configuraremos los valores de <strong>Dirección de WordPress (<code>WP_SITEURL</code>)</strong> y <strong>Dirección del sitio (<code>WP_HOME</code>)</strong> con los siguientes valores:</p>
+<ul>
+<li><strong>Dirección de WordPress (<code>WP_SITEURL</code>):</strong> http://IP_BALANCEADOR/wordpress</li>
+<li><strong>Dirección del sitio (<code>WP_HOME</code>):</strong> http://IP_BALANCEADOR</li>
+</ul>
+<p>Ejemplo:</p>
+<ul>
+<li><strong>Dirección de WordPress (<code>WP_SITEURL</code>):</strong> http://192.168.33.10/wordpress</li>
+<li><strong>Dirección del sitio (<code>WP_HOME</code>):</strong> http://192.168.33.10</li>
+</ul>
+<p>Nota:</p>
+<ul>
+<li><strong>Dirección de WordPress (<code>WP_SITEURL</code>):</strong> Es la URL que incluye el directorio donde está instalado WordPress.</li>
+<li><strong>Dirección del sitio (<code>WP_HOME</code>):</strong> Es la URL que queremos que usen los usuarios para acceder a WordPress.</li>
+</ul>
+<p><mark>Las variables <code>WP_SITEURL</code> y <code>WP_HOME</code> se pueden configurar en el panel de control web de WordPress o directamente en el archivo de configuración <code>wp-config.php</code>.</mark></p>
+<h3 id="configuración-de-wordpress-en-un-directorio-que-no-es-el-raíz"><span class="header-section-number">1.4.2</span> Configuración de WordPress en un directorio que no es el raíz</h3>
+<p>Realiza las siguientes acciones en cada uno de los frontales web:</p>
+<ul>
+<li><strong>Copia</strong> el archivo <code>/var/www/html/wordpress/index.php</code> a <code>/var/www/html/index.php</code>.</li>
+<li>Edita el archivo <code>/var/www/html/index.php</code> y modifica la siguiente línea de código:</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode php"><code class="sourceCode php"><a class="sourceLine" id="cb12-1" title="1"><span class="co">/** Loads the WordPress Environment and Template */</span></a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">require</span><span class="ot">(</span> <span class="fu">dirname</span><span class="ot">(</span> <span class="kw">__FILE__</span> <span class="ot">)</span> . <span class="st">&#39;/wp-blog-header.php&#39;</span> <span class="ot">);</span></a></code></pre></div>
+<p>Por esta línea de código:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode php"><code class="sourceCode php"><a class="sourceLine" id="cb13-1" title="1"><span class="co">/** Loads the WordPress Environment and Template */</span></a>
+<a class="sourceLine" id="cb13-2" title="2"><span class="kw">require</span><span class="ot">(</span> <span class="fu">dirname</span><span class="ot">(</span> <span class="kw">__FILE__</span> <span class="ot">)</span> . <span class="st">&#39;/wordpress/wp-blog-header.php&#39;</span> <span class="ot">);</span></a></code></pre></div>
+<p>Donde <strong><code>wordpress</code></strong> es el directorio donde se encuentra el código fuente de <a href="https://wordpress.org">WordPress</a> que hemos descomprimido en pasos anteriores.</p>
+<ul>
+<li>Crea un archivo <code>.htaccess</code> en el directorio <code>/var/www/html/</code> con el siguiente contenido:</li>
+</ul>
+<pre><code># BEGIN WordPress
+&lt;IfModule mod_rewrite.c&gt;
 RewriteEngine On
 RewriteBase /
 RewriteRule ^index\.php$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
-</IfModule>
-# END WordPress
-```
-Para que el contenido de los archivos .htaccess sea interpretado por el servidor web Apache tendrá que incluir la directiva AllowOverride en el archivo de configuración de Apache.
-
-Una vez hecho esto ya podremos acceder a WordPress desde la IP del balanceador de carga.
-
-### 1.4.3 Configuración de las *Security Keys*
-Podemos mejorar la seguridad de WordPress configurando las security keys que aparecen en el archivo wp-config.php.
+&lt;/IfModule&gt;
+# END WordPress</code></pre>
+<p><mark>Para que el contenido de los archivos <code>.htaccess</code> sea interpretado por el servidor web Apache tendrá que incluir la directiva <code>AllowOverride</code> en el archivo de configuración de Apache.</mark></p>
+<p>Una vez hecho esto ya podremos acceder a <a href="https://wordpress.org">WordPress</a> desde la IP del balanceador de carga.</p>
+<h3 id="configuración-de-las-security-keys"><span class="header-section-number">1.4.3</span> Configuración de las <em>Security Keys</em></h3>
+<p>Podemos mejorar la seguridad de WordPress configurando las <em>security keys</em> que aparecen en el archivo <code>wp-config.php</code>.</p>
+<p><a href="https://codex.wordpress.org/Editing_wp-config.php#Security_Keys">En la documentación oficial podemos encontrar el motivo por el que nos recomiendan configurar estas <em>security keys</em> y cómo podemos hacerlo</a>.</p>
+<h2 id="tutorial-de-referencia"><span class="header-section-number">1.5</span> Tutorial de referencia</h2>
+<ul>
+<li><a href="https://codex.wordpress.org/es:Instalando_Wordpress">Tutorial oficial de instalación de WordPress</a>.</li>
+</ul>
+<h2 id="tutoriales-de-amazon-que-vamos-a-utilizar-en-esta-práctica"><span class="header-section-number">1.6</span> Tutoriales de Amazon que vamos a utilizar en esta práctica</h2>
+<ul>
+<li><a href="https://aws.amazon.com/getting-started/tutorials/launch-a-virtual-machine/?trk=gs_card">Cómo crear una máquina virtual con Amazon EC2</a>.</li>
+<li><a href="https://aws.amazon.com/getting-started/tutorials/launch-a-wordpress-website/?trk=gs_card">Cómo crear una máquina virtual con WordPress en con Amazon EC2</a>.</li>
+</ul>
+<h2 id="otros-tutoriales-para-crear-sitios-wordpress-escalables"><span class="header-section-number">1.7</span> Otros tutoriales para crear sitios WordPress escalables</h2>
+<ul>
+<li><a href="https://d1.awsstatic.com/whitepapers/wordpress-best-practices-on-aws.pdf?trk=gs_card">Cómo crear sitios WordPress escalables en Amazon EC2</a>.</li>
+<li><a href="https://aws.amazon.com/getting-started/projects/build-wordpress-website/?trk=gs_card">Cómo crear un sition WordPress con AWS Elastic Beanstalk y Amazon Relational Database Service (RDS)</a>.</li>
+</ul>
+<h2 id="entregables"><span class="header-section-number">1.8</span> Entregables</h2>
+<p>En esta práctica habrá que entregar un <strong>documento técnico</strong> con la descripción de los pasos que se han llevado a cabo durante todo el proceso.</p>
+<p>El documento debe incluir <strong>como mínimo</strong> lo siguientes contenidos:</p>
+<ul>
+<li><p>URL del repositorio de GitHub donde se ha alojado el documento técnico escrito en <a href="https://es.wikipedia.org/wiki/Network_File_System">Markdown</a>.</p></li>
+<li><p><em>Scripts</em> de bash utilizados para realizar el aprovisionamiento de las máquinas virtuales.</p></li>
+<li><p>Tenga en cuenta que el aprovisionamiento de las máquinas virtuales se realizará mediante un <em>script</em> de <em>bash</em>. Cada máquina usará su propio <em>script</em>. El contenido de cada uno de los <em>scripts</em> deberá ser incluido en el documento y <strong>deberá describir qué acciones se han ido realizando en cada uno de ellos</strong>.</p></li>
+</ul>
+<h1 id="créditos"><span class="header-section-number">2</span> Créditos</h1>
+<ul>
+<li>Las imágenes utilizadas en esta guía se han obtenido de <a href="https://www.digitalocean.com">DigitalOcean</a>.</li>
+</ul>
+<h1 id="referencias"><span class="header-section-number">3</span> Referencias</h1>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorial_series/building-for-production-web-applications">Building for Production: Web Applications</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/building-for-production-web-applications-deploying">Building for Production: Web Applications — Deploying</a></li>
+<li><a href="https://wordpress.org">WordPress.org</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-16-04">How To Set Up an NFS Mount on Ubuntu 16.04</a></li>
+<li><a href="https://generatewp.com/wp-config/">Generador automático de archivos <code>wp-config.php</code> para WordPress</a></li>
+<li><a href="https://codex.wordpress.org/Main_Page">WordPress Codex. Manual online para WordPress</a></li>
+<li><a href="https://codex.wordpress.org/Installing_WordPress">Installing WordPress</a></li>
+<li><a href="https://codex.wordpress.org/Advanced_Topics">Advanced topics about WordPress</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/automating-the-deployment-of-a-scalable-wordpress-site">Automating the deployment of a scalable WordPress site</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-create-a-redundant-storage-pool-using-glusterfs-on-ubuntu-20-04-es">Cómo crear un grupo de almacenamiento redundante con GlusterFS en Ubuntu 20.04</a>. Mark Drake.</li>
+<li><a href="resources/21_Tips_WP_Ebook_ES.pdf">Ebook: 21 Trucos para tener tu WordPress seguro</a>. SiteGround.</li>
+</ul>
