@@ -26,6 +26,7 @@ systemctl restart apache2
 cp /home/ubuntu/htaccess /var/www/html/.htaccess
 # Editamos el archivo 000-default de Apache
 cp /home/ubuntu/000-default.conf /etc/apache2/sites-available/
+#-----------------cliente nfs--------------------
 # Instalamos paquetes necesarios para cliente NFS
 apt-get install nfs-common -y
 # Montamos el directorio compartido entre frontales
