@@ -68,6 +68,7 @@ sed -i "/@-/a $SECURITY_KEYS" /var/www/html/wordpress/wp-config.php
 rm /var/www/html/index.html
 # Reiniciamops Apache
 systemctl restart apache2
+#------------------------servidor FFS ------------------------------------------
 # Instalamos paquetes necesarios para servidor NFS para compratir carpetas
 apt install nfs-kernel-server -y
 # Cambiamos grupo y propietario al directorio /var/www/html
